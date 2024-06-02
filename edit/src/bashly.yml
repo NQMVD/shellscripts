@@ -1,6 +1,6 @@
 name: edit
 help: like just but for batch editing files
-version: 0.2.0
+version: 0.3.0
 
 flags:
   - long: --template
