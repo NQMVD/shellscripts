@@ -1,0 +1,9 @@
+name: edit
+help: like just but for batch editing files
+version: 0.2.0
+
+flags:
+  - long: --template
+    short: -t
+    arg: name
+    help: Creates an editfile from a template

@@ -1,0 +1,6 @@
+name: rust_inset
+help: Helper script for helix coding
+version: 0.1.0
+
+examples:
+  - bat main.rs | rust_inset

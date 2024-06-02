@@ -1,0 +1,8 @@
+name: lsrepos
+help: list repos in cwd
+version: 0.1.0
+
+flags:
+- long: --force
+  short: -f
+  help: Overwrite existing files

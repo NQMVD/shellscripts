@@ -1,0 +1,14 @@
+name: pkgmngr
+help: Package ceo written in bash
+version: 0.1.0
+
+args:
+- name: pkg
+  required: true
+  help: pkg to find in managers
+
+
+examples:
+- pkgmngr zellij
+- pkgmngr neovim
+- pkgmngr gum
