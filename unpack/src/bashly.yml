@@ -1,19 +1,12 @@
-name: download
-help: Sample minimal application without commands
+name: unpack
+help: unpacks zips or tarballs
 version: 0.1.0
 
 args:
-- name: source
+- name: file
   required: true
-  help: URL to download from
-- name: target
-  help: "Target filename (default: same as source)"
-
-flags:
-- long: --force
-  short: -f
-  help: Overwrite existing files
+  help: name of the archive
 
 examples:
-- download example.com
-- download example.com ./output -f
+- unpack archive.zip
+- unpack archive.tar.gz

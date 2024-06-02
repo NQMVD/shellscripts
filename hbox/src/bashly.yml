@@ -1,0 +1,15 @@
+name: hbox
+help: gum style box with a colored header
+version: 0.1.0
+
+catch_all: true
+
+args:
+- name: header
+  required: true
+# - name: content
+#   required: true
+#   help: Don't wrap a subshell call in quotes...
+
+examples:
+- hbox HEADER $(ls)
