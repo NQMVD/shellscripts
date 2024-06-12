@@ -1,0 +1,10 @@
+name: splitat
+help: splits a string at the given delimeter
+version: 0.1.0
+
+args:
+- name: delimiter
+  required: true
+
+examples:
+- echo 'Hello.Moon' | splitat '.'

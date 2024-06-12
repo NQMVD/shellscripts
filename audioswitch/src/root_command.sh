@@ -1,34 +1,14 @@
-# Function to list all available sound output devices
-list_output_devices() {
-    pactl list short sinks | awk '{print $2}'
-}
+devices=($(pactl list short sinks | awk '{print $2}'))
 
-# Function to set the default sound output device
-set_output_device() {
-    local device=$1
-    pactl set-default-sink "$device"
-}
+choice=$(gum choose --header="Available sound output devices:" "${devices[@]}")
 
-# Function to display a menu and let the user choose an output device
-choose_output_device() {
-    local devices=($(list_output_devices))
-    echo "Available sound output devices:"
-    
-    for i in "${!devices[@]}"; do
-        echo "$i: ${devices[$i]}"
-    done
-    
-    echo -n "Choose a device number: "
-    read choice
-    
-    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 0 ] && [ "$choice" -lt "${#devices[@]}" ]; then
-        set_output_device "${devices[$choice]}"
-        echo "Switched to ${devices[$choice]}"
+if is not empty "$choice"; then
+    if pactl set-default-sink "$choice"; then 
+        gum log -sl info 'Switched to' device "$choice"
     else
-        echo "Invalid choice. Exiting."
-        exit 1
+        gum log -sl error 'Failed to set' device "$choice"
     fi
-}
-
-# Main script execution
-choose_output_device
+else
+    gum log -l error 'Aborted...'
+    exit 1
+fi

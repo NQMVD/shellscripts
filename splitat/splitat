@@ -12,21 +12,17 @@ fi
 # :command.root_command
 root_command() {
   # src/root_command.sh
-  devices=($(pactl list short sinks | awk '{print $2}'))
+  delimiter=${args[delimiter]}
+  input=$(cat)
 
-  choice=$(gum choose --header="Available sound output devices:" "${devices[@]}")
+  # Split the input string and store chunks in an array
+  IFS="$delimiter" read -ra chunks <<< "$input"
 
-  if is not empty "$choice"; then
-      if pactl set-default-sink "$choice"; then
-
-          gum log -sl info 'Switched to' device "$choice"
-      else
-          gum log -sl error 'Failed to set' device "$choice"
-      fi
-  else
-      gum log -l error 'Aborted...'
-      exit 1
-  fi
+  # Print the chunks in a format suitable for storing in an array
+  for chunk in "${chunks[@]}"; do
+      echo -n "$chunk "
+  done
+  echo
 
 }
 
@@ -36,21 +32,21 @@ version_command() {
 }
 
 # :command.usage
-audioswitch_usage() {
+splitat_usage() {
   if [[ -n $long_usage ]]; then
-    printf "audioswitch - audio switch for terminals\n"
+    printf "splitat - splits a string at the given delimeter\n"
     echo
 
   else
-    printf "audioswitch - audio switch for terminals\n"
+    printf "splitat - splits a string at the given delimeter\n"
     echo
 
   fi
 
   printf "%s\n" "Usage:"
-  printf "  audioswitch\n"
-  printf "  audioswitch --help | -h\n"
-  printf "  audioswitch --version | -v\n"
+  printf "  splitat DELIMITER\n"
+  printf "  splitat --help | -h\n"
+  printf "  splitat --version | -v\n"
   echo
 
   # :command.long_usage
@@ -63,6 +59,19 @@ audioswitch_usage() {
     echo
     printf "  %s\n" "--version, -v"
     printf "    Show version number\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "DELIMITER"
+    printf "\n"
+    echo
+
+    # :command.usage_examples
+    printf "%s\n" "Examples:"
+    printf "  echo 'Hello.Moon' | splitat '.'\n"
     echo
 
   fi
@@ -147,7 +156,7 @@ parse_requirements() {
 
       --help | -h)
         long_usage=yes
-        audioswitch_usage
+        splitat_usage
         exit
         ;;
 
@@ -174,13 +183,25 @@ parse_requirements() {
       *)
         # :command.parse_requirements_case
         # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
+        # :argument.case
+        if [[ -z ${args['delimiter']+x} ]]; then
+          args['delimiter']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
 
         ;;
 
     esac
   done
+
+  # :command.required_args_filter
+  if [[ -z ${args['delimiter']+x} ]]; then
+    printf "missing required argument: DELIMITER\nusage: splitat DELIMITER\n" >&2
+    exit 1
+  fi
 
 }
 
