@@ -1,0 +1,17 @@
+name: helf
+help: Sample minimal application without commands
+version: 0.1.0
+
+args:
+- name: program
+  required: true
+  help: URL to download from
+
+flags:
+- long: --force
+  short: -f
+  help: Overwrite existing files
+
+examples:
+- download example.com
+- download example.com ./output -f
