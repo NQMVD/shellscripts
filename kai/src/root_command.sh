@@ -73,6 +73,31 @@ After you write the script, show an example of how it would be executed."
 if gum confirm --affirmative "Copy" --negative "Run (ollama)" "$(gum style --foreground 99 'Done!') Next?"; then
   echo "$PROMPT" | wl-copy
 else
-  # TODO implement
-  echo "WIP"
+  MODEL='codellama'
+  RESPONSE=$(gum spin --title="Generating..." -- ollama run "$MODEL" "$PROMPT")
+  echo "# DATE: $(date)
+---
+# MODEL: ${MODEL}
+---
+# PROMPT::
+${PROMPT}
+---
+# RESPONSE::
+${RESPONSE}
+" > "${HOME}/ai/${MODEL}/question_$(date +%c | tr ' ' '_').md"
+
+  # show with glow
+  echo "$RESPONSE" | glow
+  # ask if okay or regen
+  if gum confirm 'Accept Response?'; then
+    FILENAME=$(gum input --header "filename to save to (in $(pwd))")
+    if is not empty "${FILENAME}"; then
+      echo "$RESPONSE" > "$FILENAME"
+      echo "Saved!"
+    else 
+    fi
+  else
+    echo 'WIP!'
+  fi
+  # if okay ask for file name to dump to
 fi
