@@ -9,15 +9,20 @@ DESC=$(gum write --header "Description:")
 is empty "$DESC" && gum log -l error "Description cannot be empty!" && exit 1
 
 # read stdin? single multi
-READSTDIN=$(gum choose --header "Read from $(gum style --foreground 99 'stdin')" "no" "single-line" "multi-line")
+READSTDIN=$(gum confirm "Read from $(gum style --foreground 99 'stdin')?" && echo "Yes" || echo "No")
 is empty "$READSTDIN" && gum log -l error "Need to know..." && exit 1
 
 # take args? list them with write
-TAKEARGS=$(gum confirm "Take args?" && echo "Yes" || echo "No")
+TAKEARGS=$(gum confirm "Take $(gum style --foreground 99 'args')?" && echo "Yes" || echo "No")
+is empty "$TAKEARGS" && gum log -l error "Need to know..." && exit 1
 if [[ "$TAKEARGS" == "Yes" ]]; then
-  ARGSLIST=$(gum write --header "List of args (Ctrl+d to send)")
+  ARGSLIST=$(chewwrite "List of args (Ctrl+d to send)")
   is empty "$ARGSLIST" && gum log -l error "Args list cannot be empty!" && exit 1
 fi
+
+# use gum?
+USEGUM=$(gum confirm "Use $(gum style --foreground 99 'Gum') for prompts?" && echo "Yes" || echo "No")
+is empty "$USEGUM" && gum log -l error "Need to know..." && exit 1
 
 # generate
 PROMPT="You will be writing a Linux bash script based on a description provided by the user. 
@@ -29,31 +34,45 @@ ${DESC}
 
 "
 
-case "$READSTDIN" in
-  "no")
-    PROMPT="${PROMPT}The script will ignore the stdin."
-    ;;
-  "single-line")
-    PROMPT="${PROMPT}The script will read a single line string from stdin."
-    ;;
-  "multi-line")
-    PROMPT="${PROMPT}The script will read a multi line string from stdin."
-    ;;
-esac
+if [[ "$READSTDIN" == "Yes" ]]; then
+  PROMPT="${PROMPT}The script will recieve piped input via the stdin.
+  "
+fi
 
-PROMPT="${PROMPT}
+if [[ "$TAKEARGS" == "Yes" ]]; then
+  PROMPT="${PROMPT}The script will take these command line arguments:
+  ${ARGSLIST}
+  "
+fi
 
-"
+if [[ "$USEGUM" == "Yes" ]]; then
+  GUMINFO='
+  When prompting the user for any input, use this "chewinput" command instead of the read command, DO NOT USE THE DEFAULT READ COMMAND:
+  INPUT=$(chewinput "MESSAGE")
 
-if [[ "$TAKEARGS" == "No" ]]; then
-  PROMPT="${PROMPT}The script will ingore any command line arguments."
-else 
-    PROMPT="${PROMPT}The script will take these command line arguments:
-    ${ARGSLIST}"
+  When asking the user to choose an option from a list, use this "gum choose" command and provide it with all the options as arguments like so
+  CHOICE=$(gum choose "option1" "option2" "option3")
+
+  When asking for multiple choice, append the --no-limit flag like so:
+  MULTICHOICE=$(gum choose --no-limit "option1" "option2" "option3")
+
+  When asking for a confirmation, use the "gum confirm" command and also provide it with a header like so:
+  IMPORTANT! the gum confirm command returns 0 if the user chose YES and 1 if the user chose NO!
+  if gum confirm "HEADER"; then
+    # user chose YES
+  else
+    # user chose NO
+  fi
+
+  IMPORTANT! if theres no need for a prompt, a choice or a confirm, DO NOT USE ANY! DO NOT BOTHER THE USER!
+  '
+
+  PROMPT="${PROMPT}
+  ${GUMINFO}
+  "
 fi
 
 PROMPT="${PROMPT}
-
 First, write out a high-level plan for how you will implement this bash script in a <scratchpad>. Break down the key steps and logic needed.
 
 Then, write out the actual bash script inside <bash_script> tags.
@@ -68,36 +87,56 @@ Aim to write a correct, robust and clear bash script that fully implements the f
 
 After you write the script, show an example of how it would be executed."
 
+CHOICE='none'
+while true; do
+  CHOICE=$(gum choose --header "$(gum style --foreground 99 'Done!') Next?" "View" "Copy" "Run" "Quit")
 
-# copy or run with ollama?
-if gum confirm --affirmative "Copy" --negative "Run (ollama)" "$(gum style --foreground 99 'Done!') Next?"; then
-  echo "$PROMPT" | wl-copy
-else
-  MODEL='codellama'
-  RESPONSE=$(gum spin --title="Generating..." -- ollama run "$MODEL" "$PROMPT")
-  echo "# DATE: $(date)
----
-# MODEL: ${MODEL}
----
-# PROMPT::
-${PROMPT}
----
-# RESPONSE::
-${RESPONSE}
-" > "${HOME}/ai/${MODEL}/question_$(date +%c | tr ' ' '_').md"
-
-  # show with glow
-  echo "$RESPONSE" | glow
-  # ask if okay or regen
-  if gum confirm 'Accept Response?'; then
-    FILENAME=$(gum input --header "filename to save to (in $(pwd))")
-    if is not empty "${FILENAME}"; then
-      echo "$RESPONSE" > "$FILENAME"
-      echo "Saved!"
-    else 
-    fi
+  if [[ "$CHOICE" == "View" ]]; then
+    echo "$PROMPT" | gum pager --show-line-numbers='no'
   else
-    echo 'WIP!'
+    break
   fi
-  # if okay ask for file name to dump to
+done
+
+if [[ "$CHOICE" == "Copy" ]]; then
+  echo "$PROMPT" | wl-copy
+  echo 'Copied!'
+elif [[ "$CHOICE" == "Run" ]]; then
+  MODEL='codellama'
+
+  while true; do
+    # RESPONSE=$(gum spin --title="Generating..." -- ollama run "$MODEL" "$PROMPT")
+
+    MODELS=$(aichat --list-models)
+    SHORTMODEL=$(gum choose 'codellama' 'llama3' 'opus')
+    FULLMODEL=$(echo "$MODELS" | rg "$SHORTMODEL")
+    # echo "Fullmodel: ${FULLMODEL}" >> fullmodel.log
+    RESPONSE=$(gum spin --title="Generating..." -- aichat --model "$FULLMODEL" "$PROMPT")
+    # RESPONSE=$(aichat --model "$FULLMODEL" "$PROMPT")
+
+    echo "# DATE: $(date)
+  ---
+  # MODEL: ${MODEL}
+  ---
+  # PROMPT::
+  ${PROMPT}
+  ---
+  # RESPONSE::
+  ${RESPONSE}
+  " > "${HOME}/ai/${SHORTMODEL}/question_$(date +%c | tr ' ' '_').md"
+
+    echo "$RESPONSE" | glow
+
+    if gum confirm 'Accept Response?'; then
+      break
+    else
+      clear
+    fi
+
+  done
+
+  FILENAME=$(gum input --header "filename to save to (in $(pwd))")
+  is empty "$FILENAME" && echo 'Aborted...' && exit 1
+  echo "$RESPONSE" > "$FILENAME"
+  echo "Saved! (entire prompt, cut off any text around the code)"
 fi
