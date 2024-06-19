@@ -22,9 +22,13 @@ root_command() {
   if [[ -n "$ZELLIJ_SESSION_NAME" ]]; then
       zellij attach $(zellij list-sessions | gum filter | awk '{print $1}')
   else
-      case $(gum choose --header='Action:' "new" "attach" "kill" "delete") in
+      case $(gum choose --header='Action:' "new" "new layout" "attach" "kill" "delete") in
           new)
               zellij --session $(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
+              ;;
+
+          "new layout")
+              zellij --layout $(eza ~/.config/zellij/layouts | xargs basename -s '.kdl' | gum choose --header='Layouts:') --session $(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
               ;;
 
           attach)

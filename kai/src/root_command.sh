@@ -135,8 +135,12 @@ elif [[ "$CHOICE" == "Run" ]]; then
 
   done
 
+  CODEBLOCKNUM=$(echo "$RESPONSE" | getcodeblocks | gum choose --header='Choose a Codeblock:'| awk -F: '{print $1}') # | cut out the first number
+  CODEBLOCK=$(echo "$RESPONSE" | getcodeblocks -n "$CODEBLOCKNUM")
+
   FILENAME=$(gum input --header "filename to save to (in $(pwd))")
   is empty "$FILENAME" && echo 'Aborted...' && exit 1
-  echo "$RESPONSE" > "$FILENAME"
-  echo "Saved! (entire prompt, cut off any text around the code)"
+  
+  echo "$CODEBLOCK" > "$FILENAME"
+  echo "Saved!"
 fi
