@@ -1,12 +1,11 @@
-# list sessions
-# choose: new -> input name; attach, kill, delete (fzf choose)
 
 gum style --foreground="#7359f8" 'Zellij Sessions:'
 zellij list-sessions
 echo ''
 
 if [[ -n "$ZELLIJ_SESSION_NAME" ]]; then
-    zellij attach $(zellij list-sessions | gum filter | awk '{print $1}')
+    # zellij attach $(zellij list-sessions | gum filter | awk '{print $1}')
+    gum style --foreground="#7359f8" 'Already in a Session...'
 else
     case $(gum choose --header='Action:' "new" "new layout" "attach" "kill" "delete") in
         new)
@@ -26,7 +25,13 @@ else
             ;;
 
         delete)
-            zellij delete-session $(zellij list-sessions | gum filter | awk '{print $1}')
+            SELECTED=($(zellij ls | gum choose --no-limit | awk '{print $1}'))
+            gum confirm "Delete ${#SELECTED[@]}?" || exit 1
+            for name in "${SELECTED[@]}"
+            do
+                # gum log -sl info 'deleting' 'session' "$name"
+                zellij delete-session "$name"
+            done
             ;;
 
         *)

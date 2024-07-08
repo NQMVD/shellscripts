@@ -12,49 +12,9 @@ fi
 # :command.root_command
 root_command() {
   # src/root_command.sh
-  # list sessions
-  # choose: new -> input name; attach, kill, delete (fzf choose)
-
-  gum style --foreground="#7359f8" 'Zellij Sessions:'
-  zellij list-sessions
-  echo ''
-
-  if [[ -n "$ZELLIJ_SESSION_NAME" ]]; then
-      # zellij attach $(zellij list-sessions | gum filter | awk '{print $1}')
-      gum style --foreground="#7359f8" 'Already in a Session...'
-  else
-      case $(gum choose --header='Action:' "new" "new layout" "attach" "kill" "delete") in
-          new)
-              zellij --session $(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
-              ;;
-
-          "new layout")
-              zellij --layout $(eza ~/.config/zellij/layouts | xargs basename -s '.kdl' | gum choose --header='Layouts:') --session $(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
-              ;;
-
-          attach)
-              zellij attach $(zellij list-sessions | gum filter | awk '{print $1}')
-              ;;
-
-          kill)
-              zellij kill-session $(zellij list-sessions | gum filter | awk '{print $1}')
-              ;;
-
-          delete)
-              SELECTED=($(zellij ls | gum choose --no-limit | awk '{print $1}'))
-              gum confirm "Delete ${#SELECTED[@]}?" || exit 1
-              for name in "${SELECTED[@]}"
-              do
-                  gum log -sl info 'deleting' 'session' "$name"
-                  zellij delete-session "$name"
-              done
-              ;;
-
-          *)
-              echo "Cancelled!"
-              ;;
-      esac
-  fi
+  echo "# this file is located in 'src/root_command.sh'"
+  echo "# you can edit it freely and regenerate (it will not be overwritten)"
+  inspect_args
 
 }
 
@@ -64,21 +24,21 @@ version_command() {
 }
 
 # :command.usage
-zel_usage() {
+conf_usage() {
   if [[ -n $long_usage ]]; then
-    printf "zel - simple zel session manager\n"
+    printf "conf - config opener\n"
     echo
 
   else
-    printf "zel - simple zel session manager\n"
+    printf "conf - config opener\n"
     echo
 
   fi
 
   printf "%s\n" "Usage:"
-  printf "  zel\n"
-  printf "  zel --help | -h\n"
-  printf "  zel --version | -v\n"
+  printf "  conf\n"
+  printf "  conf --help | -h\n"
+  printf "  conf --version | -v\n"
   echo
 
   # :command.long_usage
@@ -175,7 +135,7 @@ parse_requirements() {
 
       --help | -h)
         long_usage=yes
-        zel_usage
+        conf_usage
         exit
         ;;
 
