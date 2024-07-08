@@ -6,12 +6,13 @@ is not empty "$2" && TYPE='write'
 
 while true; do
   INPUT=$(gum $TYPE --header "${HEADER} (non-empty)")
-
+  CODE=$?
+  
   if is not empty "$INPUT"; then
     break
   fi
 
-  if is equal $? 130; then
+  if is equal $CODE 130; then
     return 1
   fi
 done
