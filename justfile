@@ -6,3 +6,6 @@ cec file:
     chmod +x {{file}}
     sudo cp "{{file}}" "/usr/local/bin/`basename {{file}} .sh`"
     @eza /usr/local/bin -1
+
+diff:
+    @git diff --name-only HEAD~1 HEAD
