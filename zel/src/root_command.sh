@@ -1,4 +1,3 @@
-
 gum style --foreground="#7359f8" 'Zellij Sessions:'
 zellij list-sessions
 echo ''
@@ -7,7 +6,7 @@ if [[ -n "$ZELLIJ_SESSION_NAME" ]]; then
     # zellij attach $(zellij list-sessions | gum filter | awk '{print $1}')
     gum style --foreground="#7359f8" 'Already in a Session...'
 else
-    case $(gum choose --header='Action:' "new" "new layout" "attach" "kill" "delete") in
+    case $(gum choose --header='Action:' "attach" "new" "new layout" "kill" "delete") in
         new)
             zellij --session $(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
             ;;
