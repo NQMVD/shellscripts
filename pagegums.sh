@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo
 echo "  0: `gum style --foreground '0' 'GUM'` `gum style --foreground '#121217' '#121217'`"

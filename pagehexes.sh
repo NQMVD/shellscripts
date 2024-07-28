@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Function to convert hex to RGB using the HEX2RGB command
 convert_hex_to_rgb() {

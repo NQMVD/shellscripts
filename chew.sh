@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 is empty "$1" && echo "Needs a HEADER" && exit 1
 HEADER="$1"
 

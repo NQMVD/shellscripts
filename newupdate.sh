@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 is not existing 'Cargo.toml' && gum log -l error 'No Cargo.toml file...' && exit 1
 

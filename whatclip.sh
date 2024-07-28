@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Define popular clipboard tools for each session type
 case "$XDG_SESSION_TYPE" in
