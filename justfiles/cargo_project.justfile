@@ -1,23 +1,22 @@
-jobs := `echo $(($(nproc) * 2 ))`
+jobs := `nproc --all`
 
 _default:
     @just --list
     @echo {{ jobs }} jobs available
 
-#======================#
-# custom recipes here: #
-#======================#
+# custom recipes here:
 
 # install the binary to /usr/local/bin
 install:
     cargo build --release --jobs {{ jobs }}
-    sudo cp -v ./target/release/{{dirname}} /usr/local/bin/
+    sudo cp -v "./target/release/$(basename {{justfile_directory()}})" /usr/local/bin/
 
-# fetch, test and install
+# fetch git and update dependencies
 @update:
-    cargo update
     git fetch
+    cargo update
 
+# increase version and update changelog
 @update-version:
     #!/usr/bin/env bash
 
