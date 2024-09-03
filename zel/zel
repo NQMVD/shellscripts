@@ -13,17 +13,17 @@ fi
 root_command() {
   # src/root_command.sh
   gum style --foreground="#7359f8" 'Zellij Sessions:'
-  zellij list-sessions
-  echo ''
 
-  SESSIONS=$(zellij list-sessions --no-formatting)
+  SESSIONS="$(zellij list-sessions --no-formatting || true)"
+
+  echo ""
 
   if echo "$SESSIONS" | rg -q -F -- 'current'; then
       gum style --foreground="#7359f8" 'Already in a Session...'
       exit 1
   fi
 
-  if echo "$SESSIONS" | rg -q -F -- 'No active zellij sessions found.'; then
+  if echo "$SESSIONS" | rg -q -F -- 'No active zellij sessions found'; then
       case $(gum choose --header='Action:' "new" "new (layout)") in
           new)
               NAME=$(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
