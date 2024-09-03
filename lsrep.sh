@@ -13,19 +13,19 @@ NC='\033[0m' # No Color
 get_remote_platform() {
     local remote_url=$(git config --get remote.origin.url)
     if [[ $remote_url == *"github.com"* ]]; then
-        echo "GitHub"
+        echo " "
     elif [[ $remote_url == *"gitlab.com"* ]]; then
-        echo "GitLab"
+        echo " "
     elif [[ $remote_url == *"bitbucket.org"* ]]; then
-        echo "Bitbucket"
+        echo " "
     else
-        echo "Unknown"
+        echo " ?"
     fi
 }
 
 # Function to get git status
 get_git_status() {
-    git fetch > /dev/null
+    git fetch &> /dev/null
     local status=$(git status --porcelain)
     if [[ -z $status ]]; then
         echo "Clean"

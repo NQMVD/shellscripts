@@ -16,39 +16,73 @@ root_command() {
   zellij list-sessions
   echo ''
 
-  if [[ -n "$ZELLIJ_SESSION_NAME" ]]; then
-      # zellij attach $(zellij list-sessions | gum filter | awk '{print $1}')
+  SESSIONS=$(zellij list-sessions --no-formatting)
+
+  if echo "$SESSIONS" | rg -q -F -- 'current'; then
       gum style --foreground="#7359f8" 'Already in a Session...'
-  else
-      case $(gum choose --header='Action:' "attach" "new" "new layout" "kill" "delete") in
+      exit 1
+  fi
+
+  if echo "$SESSIONS" | rg -q -F -- 'No active zellij sessions found.'; then
+      case $(gum choose --header='Action:' "new" "new (layout)") in
           new)
-              zellij --session $(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
+              NAME=$(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
+              [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
+              zellij --session "$NAME"
               ;;
 
-          "new layout")
-              zellij --layout $(eza ~/.config/zellij/layouts | xargs basename -s '.kdl' | gum choose --header='Layouts:') --session $(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
+          "new (layout)")
+              NAME=$(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
+              [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
+              LAYOUT=$(eza ~/.config/zellij/layouts | xargs basename -s '.kdl' | gum choose --header='Layouts:')
+              [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
+              zellij --layout "$LAYOUT" --session "$NAME"
               ;;
 
+          *)
+              echo "Cancelled!"
+              ;;
+      esac
+  else
+      case $(gum choose --header='Action:' "attach" "new" "new (layout)" "kill" "delete") in
           attach)
-              zellij attach $(zellij list-sessions | gum filter | awk '{print $1}')
+              NAME=$(zellij list-sessions | gum filter | awk '{print $1}')
+              [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
+              zellij attach "$NAME"
+              ;;
+
+          new)
+              NAME=$(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
+              [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
+              zellij --session "$NAME"
+              ;;
+
+          "new (layout)")
+              NAME=$(gum input --header="New Session" --placeholder="..." --prompt="Name: ")
+              [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
+              LAYOUT=$(eza ~/.config/zellij/layouts | xargs basename -s '.kdl' | gum choose --header='Layouts:')
+              [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
+              zellij --layout "$LAYOUT" --session "$NAME"
               ;;
 
           kill)
-              zellij kill-session $(zellij list-sessions | gum filter | awk '{print $1}')
+              NAME=$(zellij list-sessions | gum filter | awk '{print $1}')
+              [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
+              zellij kill-session "$NAME"
               ;;
 
           delete)
-              SELECTED=($(zellij ls | gum choose --no-limit | awk '{print $1}'))
+              SELECTED=()
+              zellij ls | gum choose --no-limit | awk '{print $1}' | while IFS="" read -r line; do array+=("$line"); done
               gum confirm "Delete ${#SELECTED[@]}?" || exit 1
               for name in "${SELECTED[@]}"
               do
-                  # gum log -sl info 'deleting' 'session' "$name"
                   zellij delete-session "$name"
               done
               ;;
 
           *)
-              echo "Cancelled!"
+              echo "Cancelled"
               ;;
       esac
   fi
