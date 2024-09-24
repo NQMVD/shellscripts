@@ -51,10 +51,17 @@ is_owned_by_me() {
     fi
 }
 
+echo -e "${BLUE}──────────────────────${NC}"
+
 # Iterate through directories
 for dir in */; do
     if [ -d "$dir" ]; then
-        cd "$dir" || exit 1
+        # Try to change into the directory, if fail, print warning and continue
+        if ! cd "$dir" 2>/dev/null; then
+            # echo -e "${RED}Warning: No permission to access '$dir'${NC}"
+            continue
+        fi
+
         if [ -d .git ]; then
             ((total_repos++))
 
