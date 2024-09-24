@@ -1,6 +1,8 @@
 gum style --foreground="#7359f8" 'Zellij Sessions:'
 
-SESSIONS="$(zellij list-sessions --no-formatting || true)"
+# zellij writes to stdout and stderr separately?
+# it exits with non-zero when there are no sessions
+SESSIONS="$(zellij list-sessions --no-formatting 2>1 || true)"
 
 echo ""
 
@@ -32,7 +34,7 @@ if echo "$SESSIONS" | rg -q -F -- 'No active zellij sessions found'; then
 else
     case $(gum choose --header='Action:' "attach" "new" "new (layout)" "kill" "delete") in
         attach)
-            NAME=$(zellij list-sessions | gum filter | awk '{print $1}')
+            NAME=$(echo $SESSIONS | gum filter | awk '{print $1}')
             [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
             zellij attach "$NAME"
             ;;

@@ -46,7 +46,7 @@ root_command() {
   else
       case $(gum choose --header='Action:' "attach" "new" "new (layout)" "kill" "delete") in
           attach)
-              NAME=$(zellij list-sessions | gum filter | awk '{print $1}')
+              NAME=$(echo $SESSIONS | gum filter | awk '{print $1}')
               [[ $? -eq 130 ]] && echo "Cancelled" && exit 130
               zellij attach "$NAME"
               ;;
