@@ -1,7 +1,7 @@
 # new bashly project
 new name:
-    @gum log -sl info "Creating" "project" {{ name }}
-    mkdir {{ name }} && cd {{ name }} && bashly init --minimal
+    touch {{ name }} && chmod +x {{ name }}
+    @"$EDITOR" {{ name }}
 
 # create executable copy in local bin
 cec file:
