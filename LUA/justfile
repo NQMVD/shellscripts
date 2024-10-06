@@ -1,0 +1,14 @@
+
+_default:
+    @just --list
+
+# update the bash.lua library
+update:
+    sudo cp bash.lua /usr/local/share/lua/5.1/bash.lua
+
+# install a script
+install file:
+    name = `basename {{ file }} .lua`
+    chmod +x {{ file }}
+    sudo cp "{{ file }}" "/usr/local/bin/$name"
+    @eza /usr/local/bin -lah | rg "$name"
