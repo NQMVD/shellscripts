@@ -8,7 +8,6 @@ update:
 
 # install a script
 install file:
-    name = `basename {{ file }} .lua`
     chmod +x {{ file }}
-    sudo cp "{{ file }}" "/usr/local/bin/$name"
-    @eza /usr/local/bin -lah | rg "$name"
+    sudo cp "{{ file }}" "/usr/local/bin/`basename {{ file }} .lua`"
+    @eza /usr/local/bin -lah | rg "`basename {{ file }} .lua`"

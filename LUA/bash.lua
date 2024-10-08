@@ -3,6 +3,7 @@
 local bash = {}
 
 -- bash.needs = has
+-- bash.hr = hr (in gray color tho)
 -- bash.file
 -- bash.exists
 -- bash.is_file
@@ -11,6 +12,18 @@ local bash = {}
 -- bash.fork
 -- bash.edit
 -- bash.kill_process
+-- bash.basename
+-- bash.dirname
+-- bash.pwd
+-- bash.zoxide
+-- bash.cd
+-- bash.mkdir
+-- bash.rm
+-- bash.touch
+-- bash.cp
+-- bash.mv
+-- bash.ln
+-- bash.ls
 
 -- Executes a command and returns its exit code.
 function bash.execute(command)
